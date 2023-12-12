@@ -12,22 +12,29 @@ module.exports = {
     await schema.validateAsync({ email });
     await db
       .getDbo()
-      .then((result) => {
-        result.collection("join").createIndex({ email: 1 }, { unique: true });
-        result.collection("join").insertOne({ email });
+      .then(async (result) => {
+        await result
+          .collection("join")
+          .createIndex({ email: 1 }, { unique: true });
+        await result
+          .collection("join")
+          .insertOne({ email })
+          .then(() => res.status(200).json({ status: true, message: "joined" }))
+          .catch((err) => {
+            if (err) {
+              if (err.code === 11000) {
+                // Duplicate key error email is not unique
+                return res.status(400).json({
+                  status: status.BAD_REQUEST,
+                  error: "Your email has already been added to the WaitList",
+                });
+              }
+              return res.status(500).json({ error: "Internal server error" });
+            }
+          });
       })
-      .catch((err) => {
-        if (err) {
-          if (err.code === 11000) {
-            // Duplicate key error email is not unique
-            return res.status(400).json({
-              status: status.BAD_REQUEST,
-              error: "Your email has already been added to the WaitList",
-            });
-          }
-          return res.status(500).json({ error: "Internal server error" });
-        }
+      .catch(() => {
+        return res.status(500).json({ error: "Internal server error" });
       });
-    res.status(200).json({ status: true, message: "joined" });
   },
 };
