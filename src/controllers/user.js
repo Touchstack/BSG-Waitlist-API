@@ -19,7 +19,9 @@ module.exports = {
         await result
           .collection("join")
           .insertOne({ email })
-          .then(() => res.status(200).json({ status: true, message: "joined" }))
+          .then(() => {
+            return res.status(200).json({ status: true, message: "joined" });
+          })
           .catch((err) => {
             if (err) {
               if (err.code === 11000) {
