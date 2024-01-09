@@ -4,6 +4,27 @@ const db = require("../models/database.js");
 const schema = require("../models/users.js");
 
 module.exports = {
+  async getUsers(req, res) {
+    await db
+      .getDbo()
+      .then(async (result) => {
+        await result
+          .collection("join")
+          .find({})
+          .toArray()
+          .then((response) => {
+            return res.status(200).json({ status: true, data: response });
+          })
+          .catch((err) => {
+            return res
+              .status(500)
+              .json({ error: "Failed to Fetch Data from Database" });
+          });
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: "Internal server error" });
+      });
+  },
   async newUser(req, res) {
     if (!has(req.body, ["email"]))
       throw { code: status.BAD_REQUEST, message: "You must specify the email" };
