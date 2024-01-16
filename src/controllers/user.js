@@ -39,7 +39,7 @@ module.exports = {
           .createIndex({ email: 1 }, { unique: true });
         await result
           .collection("join")
-          .insertOne({ email })
+          .insertOne({ email, timestamp: new Date().toISOString() })
           .then(() => {
             return res.status(200).json({ status: true, message: "joined" });
           })
